@@ -7,7 +7,7 @@ import logging
 import config
 from User import User, get_or_create, engine
 from utils import get_token_from_url
-from texts import texts
+from texts import Texts
 import aiogram
 from sqlalchemy.orm import sessionmaker
 from vk import get_user_data
@@ -54,7 +54,7 @@ class Register(StatesGroup):
 
 @dp.message_handler(commands=['start'])
 async def start(message):
-    await send_message(message.chat.id, texts.start)
+    await send_message(message.chat.id, Texts.start)
     user = get_or_create(session, User, telegram_id=message.chat.id)
     user.telegram_chat_id = message.chat.id
     user.status = "waiting_for_vk_token"
@@ -68,7 +68,7 @@ async def waiting_for_vk_token(message):
         user.vk_token = token = get_token_from_url(message.text)
         user_data = get_user_data(token)
     except IndexError or VKAPIError_5: # TODO Эот ексепшн вызывается при попытке использования неправильного токена
-        await send_message(message.chat.id, texts.invalid_token)
+        await send_message(message.chat.id, Texts.invalid_token)
         log.warning(f"Invalid token from user {message.user.id}")
         return
     user.status = "select_chats"
